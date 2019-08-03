@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://camel.apache.org/schema/spring
+         http://camel.apache.org/schema/spring/camel-spring.xsd
+         http://www.springframework.org/schema/context
+	     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:property-placeholder />
+    <context:component-scan base-package="com.pagseguro.redis.camel, redis"/>
+
+    <bean id="timerRouterBean" class="com.pagseguro.redis.camel.TimerRedisRouter"
+        p:periodInSeconds="${period}" />
+
+    <bean id="redisRssFeedBean" class="com.pagseguro.redis.camel.RedisFeedRouter"/>
+
+    <bean id="redisRestApiBean" class="com.pagseguro.redis.camel.RedisRestApiRouter"/>
+
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <routeBuilder ref="timerRouterBean"/>
+        <routeBuilder ref="redisRssFeedBean"/>
+        <routeBuilder ref="redisRestApiBean"/>
+    </camelContext>
+
+    <!-- Openshift -->
+    <!--
+      p:hostName="redis-master-service"
+      -->
+    <!--
+    <bean id="redisCnnFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory"
+          p:hostName="${host_name}"
+          p:port="${port_number}" />
+     -->
+    <!-- localhost - docker -->
+
+    <bean id="redisCnnFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory"
+          p:hostName="idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com"
+          p:useSsl="true"
+          p:port="6379"/>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate"
+          p:connection-factory-ref="redisCnnFactory"
+          p:defaultSerializer-ref="stringRedisSerializerBean"/>
+
+    <bean id="stringRedisSerializerBean" class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+
+</beans>

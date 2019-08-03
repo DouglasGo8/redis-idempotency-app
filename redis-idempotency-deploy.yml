@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-idempotency-backend-app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: redis-idempotency
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: redis-idempotency
+        tier: backend
+    spec:
+      containers:
+        - image: douglasdb/redis-idempotency-app:latest
+          name: redis-idempotency-app
+          env:
+            - name: host_name
+              value: "redis-cluster"
+            - name: port_number
+              value: "6379"
+            - name: period
+              value: "30"
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /idempotency/v1/list
+              port: 9090
+            initialDelaySeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 500Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-idempotency-backend-service
+spec:
+  selector:
+    app: redis-idempotency
+    tier: backend
+  type: NodePort
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      nodePort: 30105
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: redis-idempotency-backend-ingress
+spec:
+  rules:
+    - host: redis-idempotency.192.168.99.100.nip.io
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: redis-idempotency-backend-service
+              servicePort: 9090
+
+
+
+
