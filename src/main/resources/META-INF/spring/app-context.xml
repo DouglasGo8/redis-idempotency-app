@@ -1,65 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://camel.apache.org/schema/spring               http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-    
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+                        http://camel.apache.org/schema/spring              
+                        http://camel.apache.org/schema/spring/camel-spring.xsd http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
     <context:property-placeholder location="classpath:application.properties"/>
-    
     <context:component-scan base-package="com.pagseguro.redis.camel"/>
-    
-    <bean class="com.pagseguro.redis.camel.TimerRedisRouter"
-        id="timerRouterBean" p:periodInSeconds="${period}"/>
+    <bean class="com.pagseguro.redis.camel.TimerRedisRouter" id="timerRouterBean" p:periodInSeconds="${period}"/>
     <bean class="com.pagseguro.redis.camel.RedisFeedRouter" id="redisFeedBean"/>
     <bean class="com.pagseguro.redis.camel.RedisRestApiRouter" id="redisRestApiBean"/>
-    
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="camel" 
+        xmlns="http://camel.apache.org/schema/spring">
         <routeBuilder ref="timerRouterBean"/>
         <routeBuilder ref="redisFeedBean"/>
         <routeBuilder ref="redisRestApiBean"/>
     </camelContext>
     <!-- Openshift -->
     <!-- p:hostName="redis-master-service" -->
-    <!-- <bean id="redisCnnFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory" 
-		p:hostName="${host_name}" p:port="${port_number}" /> -->
+    <!-- <bean id="redisCnnFactory" class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory" p:hostName="${host_name}" p:port="${port_number}" /> -->
     <!-- localhost - docker -->
     <!-- 
-    <bean
-        class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory"
-        id="redisCnnFactory" p:hostName="localhost" p:port="6379"/>
+    <bean class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory" id="redisCnnFactory" p:hostName="localhost" p:port="6379"/>
      -->
-    
-	<bean class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory"
-		id="redisCnnFactory">
-		<constructor-arg name="clusterConfiguration"
-			ref="myRedisConf" />
-	</bean>
-	 
-	<bean
-		class="org.springframework.data.redis.connection.RedisClusterConfiguration"
-		id="myRedisConf" 
-		p:max-redirects="3">
-		<property name="clusterNodes">
-			<list>
-				<!-- 
+    <bean class="org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory" id="redisCnnFactory">
+        <constructor-arg name="clusterConfiguration" ref="myRedisConf" />
+    </bean>
+    <bean class="org.springframework.data.redis.connection.RedisClusterConfiguration" id="myRedisConf" p:max-redirects="3">
+        <property name="clusterNodes">
+            <list>
+                <!-- 
 					idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com
 						-> idempotencycache-0001-001.ciu7rf.0001.use1.cache.amazonaws.com 
 						-> idempotencycache-0001-002.ciu7rf.0001.use1.cache.amazonaws.com
-				 --> 
-				<bean
-					class="org.springframework.data.redis.connection.RedisNode">
-					<constructor-arg name="host"
-						value="idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com" />
-					<constructor-arg name="port" value="6379" />
-				</bean>
-			</list>
-		</property>
-	</bean>
-
-    <bean class="org.springframework.data.redis.core.RedisTemplate"
-        id="redisTemplate" p:connection-factory-ref="redisCnnFactory" 
-        p:defaultSerializer-ref="stringRedisSerializerBean"/>
-    <bean
-        class="org.springframework.data.redis.serializer.StringRedisSerializer" 
-        id="stringRedisSerializerBean"/>
+				 -->
+                <bean class="org.springframework.data.redis.connection.RedisNode">
+                    <constructor-arg name="host" value="idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com" />
+                    <constructor-arg name="port" value="6379" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+    <bean class="org.springframework.data.redis.core.RedisTemplate" id="redisTemplate" p:connection-factory-ref="redisCnnFactory" p:defaultSerializer-ref="stringRedisSerializerBean"/>
+    <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" id="stringRedisSerializerBean"/>
 </beans>
