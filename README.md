@@ -39,6 +39,9 @@ docker run -d --rm --name redis-idempotency redis-idempotency-app:latest
 
 docker run --name redis --rm -d -p 6379:6379 --network=host redis redis-server --appendonly yes
 
+# Redis Cli
+redis-cli -c -h idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com -p 6379
+
 
 # Minishift command
 minishift start --vm-driver virtualbox --show-libmachine-logs
@@ -50,3 +53,4 @@ http://redis-idempotency.192.168.99.100.nip.io/idempotency/v1/list
 # Useful links
 https://www.devcon5.ch/en/blog/2017/10/25/optimizing-docker-images-for-java/
 http://whitfin.io/speeding-up-maven-docker-builds/
+https://stackoverflow.com/questions/42477437/springredis-about-the-type-of-systemenv

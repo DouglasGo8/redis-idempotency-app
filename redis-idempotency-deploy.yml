@@ -24,7 +24,7 @@ spec:
           name: redis-idempotency-app
           env:
             - name: host_name
-              value: "redis-cluster"
+              value: "idempotencycache.ciu7rf.clustercfg.use1.cache.amazonaws.com"
             - name: port_number
               value: "6379"
             - name: period

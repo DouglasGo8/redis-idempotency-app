@@ -9,8 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class RedisFeedModel {
-
-    private final String key;
-    private final String value;
-
+	
+	private final String key;
+	private final String value;
 }

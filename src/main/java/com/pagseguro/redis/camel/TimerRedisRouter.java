@@ -1,28 +1,47 @@
 package com.pagseguro.redis.camel;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.camel.builder.RouteBuilder;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+/**
+ * 
+ * @author dbatista
+ *
+ */
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class TimerRedisRouter extends RouteBuilder {
 
-    /**
-     *
-     */
-    private int periodInSeconds;
+	/**
+	 *
+	 */
+	private int periodInSeconds;
 
-    /**
-     *
-     * @throws Exception
-     */
-    @Override
-    public void configure() throws Exception {
+	/**
+	 *
+	 * @throws Exception
+	 */
+	@Override
+	public void configure() throws Exception {
 
-        from(String.format("timer://myTimer?fixedRate=true&period=%ds", periodInSeconds))
-                .to("seda:a")
-                .end();
+    	onException(Exception.class)
+		.handled(true)
+		.setBody()
+			.simple("${exception.message}");
+		
+		//from("timer://myTimer?fixedRate=true&period=30s")
+		//	.to("seda:a")
+		//	.end();
 
-    }
+		
+		  from(String.format("timer://myTimer?fixedRate=true&period=%ds", periodInSeconds))
+		  	.to("seda:a")
+		  	.end();
+		 
+
+	}
 }
